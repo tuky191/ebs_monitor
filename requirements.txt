@@ -1,3 +1,3 @@
 python-dotenv
-datadog
+datadog_api_client
 boto3
