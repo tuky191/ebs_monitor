@@ -24,8 +24,7 @@ def get_volumes():
                 'Name': 'volume-type',
                 'Values': [
                     'io1',
-                    'io2',
-                    'gp3'
+                    'io2'
                 ]
             },
         ]
