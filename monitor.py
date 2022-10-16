@@ -2,12 +2,13 @@
 from datadog_api_client import ApiClient, Configuration
 from datadog_api_client.v1.api.events_api import EventsApi
 from datadog_api_client.v1.model.event_create_request import EventCreateRequest
-
+import time
 import boto3
 from dotenv import load_dotenv
 import logging
 import json
-
+from datetime import datetime, timedelta, timezone
+from pprint import pprint
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -47,13 +48,16 @@ if __name__ == "__main__":
     volumes = get_volumes()
 
     if len(volumes) > 0:
+        current_time = datetime.now(timezone.utc)
         result = [{"VolumeId": volume["VolumeId"], "VolumeType": volume["VolumeType"], "Iops": volume["Iops"], "Size": volume["Size"], "CreateTime": volume["CreateTime"].strftime("%Y-%m-%dT%H:%M:%SZ")}
-                  for volume in volumes]
-        logging.info("Found io1/io2 volumes: %s", result)
-        send_notification({
-            "title": "Found io1 or io2 volumes",
-            "text": json.dumps(result),
-            "tags": ["app:ebs_monitor"]
-        })
-    else:
-        logging.info("No io1/io2 volumes found")
+                  for volume in volumes if volume["CreateTime"] > current_time - timedelta(hours=8)]
+        if len(result) > 0:
+            logging.info("Found io1/io2 volumes: %s", result)
+            send_notification({
+                "title": "Found io1 or io2 volumes existing longer then 8 hours",
+                "text": json.dumps(result),
+                "tags": ["app:ebs_monitor"],
+                "alert_type": "warning",
+            })
+        else:
+            logging.info("No io1/io2 volumes found")
