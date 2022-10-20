@@ -50,7 +50,7 @@ if __name__ == "__main__":
     if len(volumes) > 0:
         current_time = datetime.now(timezone.utc)
         result = [{"VolumeId": volume["VolumeId"], "VolumeType": volume["VolumeType"], "Iops": volume["Iops"], "Size": volume["Size"], "CreateTime": volume["CreateTime"].strftime("%Y-%m-%dT%H:%M:%SZ")}
-                  for volume in volumes if volume["CreateTime"] > current_time - timedelta(hours=8)]
+                  for volume in volumes if volume["CreateTime"] < current_time - timedelta(hours=8)]
         if len(result) > 0:
             logging.info("Found io1/io2 volumes: %s", result)
             send_notification({
